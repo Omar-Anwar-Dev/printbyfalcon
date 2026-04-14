@@ -1,0 +1,42 @@
+services:
+  postgres-db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: printbyfalcon
+      POSTGRES_USER: falcon
+      POSTGRES_PASSWORD: falconpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+
+  redis-cache:
+    image: redis:7-alpine
+    restart: always
+    command: redis-server --requirepass redispass
+    ports:
+      - "6379:6379"
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    restart: always
+    environment:
+      MEILI_MASTER_KEY: masterkey
+      MEILI_ENV: development
+    ports:
+      - "7700:7700"
+
+  minio:
+    image: minio/minio:latest
+    restart: always
+    command: server /data --console-address ':9001'
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+volumes:
+  postgres_dev_data:
