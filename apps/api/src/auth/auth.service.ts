@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
 import { Role } from '@prisma/client';
+import { CartService } from '../cart/cart.service';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +18,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
+    private cartService: CartService,
   ) {}
 
   // ── Register ──────────────────────────────────────────────
@@ -49,9 +51,15 @@ export class AuthService {
   }
 
   // ── Login ─────────────────────────────────────────────────
-  async login(userId: string, email: string, role: Role) {
-    const tokens = await this.generateTokens(userId, email, role);
-    await this.saveRefreshToken(userId, tokens.refreshToken);
+  async login(user: any, session?: Record<string, any>) {
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    await this.saveRefreshToken(user.id, tokens.refreshToken);
+    
+    // Merge any guest cart items into the user's DB cart
+    if (session) {
+      await this.cartService.mergeGuestCartOnLogin(user.id, session);
+    }
+    
     return tokens;
   }
 

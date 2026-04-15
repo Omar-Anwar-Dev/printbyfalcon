@@ -48,6 +48,11 @@ export class UploadService implements OnModuleInit {
       'Content-Type': mimetype,
     });
 
+    // Use public URL if set (for production), otherwise build internal URL (for dev)
+    const publicUrl = this.config.get('MINIO_PUBLIC_URL');
+    if (publicUrl) {
+      return `${publicUrl}/${this.bucket}/${filename}`;
+    }
     const endpoint = this.config.get('MINIO_ENDPOINT', 'minio');
     const port = this.config.get('MINIO_PORT', '9000');
     return `http://${endpoint}:${port}/${this.bucket}/${filename}`;
