@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { MeiliSearch } = require('meilisearch');
+const { Meilisearch } = require('meilisearch');
 
 @Injectable()
 export class SearchService implements OnModuleInit {
@@ -14,7 +14,7 @@ export class SearchService implements OnModuleInit {
     private config: ConfigService,
     private prisma: PrismaService,
   ) {
-    this.client = new MeiliSearch({
+    this.client = new Meilisearch({
       host: config.get('MEILI_HOST', 'http://meilisearch:7700'),
       apiKey: config.get('MEILI_MASTER_KEY'),
     });
