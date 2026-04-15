@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 // @ts-ignore
-import MeiliSearch from 'meilisearch';
+import { MeiliSearch } from 'meilisearch';
 
 @Injectable()
 export class SearchService implements OnModuleInit {
