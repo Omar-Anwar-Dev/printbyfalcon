@@ -4,9 +4,8 @@ COPY package*.json ./
 COPY nest-cli.json ./
 RUN npm install
 COPY . .
-RUN npx prisma generate --schema=prisma/schema.prisma
+RUN npx prisma generate --schema=prisma/schema.prisma --no-engine
 RUN npm run build
-RUN ls -la dist/
 
 FROM node:20-alpine AS runner
 WORKDIR /app
