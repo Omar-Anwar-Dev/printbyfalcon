@@ -1,12 +1,12 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-// @ts-ignore
-import { MeiliSearch } from 'meilisearch';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { MeiliSearch } = require('meilisearch');
 
 @Injectable()
 export class SearchService implements OnModuleInit {
-  private client: MeiliSearch;
+  private client: any;
   private readonly INDEX_NAME = 'products';
   private readonly logger = new Logger(SearchService.name);
 
