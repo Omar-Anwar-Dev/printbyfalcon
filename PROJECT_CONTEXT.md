@@ -98,50 +98,24 @@
   - DELETE /admin/products/:id
 - UploadModule: MinIO integration, auto-creates bucket on startup
 
-### ✅ Day 5 — Meilisearch Smart Search
-- SearchModule complete:
-  - GET /products/search?q= (typo-tolerant, Arabic+English)
-  - GET /products/autocomplete?q=
-  - POST /admin/search/sync (bulk sync all products)
-  - GET /admin/search/popular (analytics)
-- Arabic synonyms configured: حبر↔ink↔cartridge, طابعة↔printer, etc.
-- Auto-sync: product create/update/delete syncs to Meilisearch
-- Search analytics saved to DB on every query
-- Typo tolerance enabled (oneTypo: 4 chars, twoTypos: 8 chars)
+### ✅ Day 6 — Cart & Wishlist
+- CartModule: full guest (Redis session) + user (DB) cart
+- Cart endpoints: GET/POST/PATCH/DELETE items, count, apply-coupon, remove-coupon, save-for-later
+- Guest cart stored in express-session → Redis
+- Cart merge on login: guest items absorbed into user DB cart
+- WishlistModule: add, remove, get, move-to-cart
+- OptionalJwtAuthGuard created for routes serving both guests and users
+- Session middleware added to main.ts with Redis store
+- SESSION_SECRET added to .env and VPS .env
 
----
-
-## Current app.module.ts imports (as of Day 5)
+## Current app.module.ts imports (as of Day 6)
 ConfigModule, ThrottlerModule, PrismaModule, HealthModule,
 AuthModule, CategoriesModule, BrandsModule, ProductsModule,
-UploadModule, SearchModule
+UploadModule, SearchModule, CartModule, WishlistModule
 
 ---
 
-## File Structure (key files)
-apps/api/src/
-├── app.module.ts
-├── main.ts (port 4000, CORS, ValidationPipe)
-├── health/
-├── prisma/ (PrismaService — @Global)
-├── auth/ (service, controller, guards, strategies, decorators, DTOs)
-├── categories/ (service, controller, DTOs)
-├── brands/ (service, controller, DTOs)
-├── products/ (service, controller, DTOs)
-├── upload/ (MinIO service)
-└── search/ (Meilisearch service, controller)
-apps/web/src/app/ (Next.js placeholder — "Coming Soon" page)
-prisma/schema.prisma (full schema)
-prisma/seed.ts (categories, brands, admin, products)
-nginx/nginx.conf (HTTPS, gzip, security headers)
-docker-compose.prod.yml (production, 7 containers)
-docker-compose.dev.yml (local dev, infrastructure only)
-scripts/deploy.sh (VPS deploy script)
-
----
-
-## What's Next (Day 6+)
-Day 6: Cart + Wishlist API
+## What's Next (Day 7+)
 Day 7: Orders + Payments (Paymob integration)
 Day 8: Email/SMS notifications
 Day 9: Admin dashboard API
