@@ -1,7 +1,6 @@
 import { PrismaClient, Role, ProductStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL || 'postgresql://falcon:falconpass@localhost:5432/printbyfalcon' });
 const adapter = new PrismaPg(pool);
