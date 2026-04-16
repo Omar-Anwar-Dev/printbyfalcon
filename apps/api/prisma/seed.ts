@@ -3,8 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { Pool } from 'pg';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL || 'postgresql://falcon:falconpass@localhost:5432/printbyfalcon' });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter } as any);
+const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Seeding database...');
