@@ -19,34 +19,30 @@ class AddToWishlistDto {
   productId: string;
 }
 
-@UseGuards(JwtAuthGuard)   // All wishlist routes require login
+@UseGuards(JwtAuthGuard)
 @Controller('wishlist')
 export class WishlistController {
   constructor(private readonly wishlistService: WishlistService) {}
 
-  // GET /api/v1/wishlist
   @Get()
   getWishlist(@Request() req: any) {
-    return this.wishlistService.getWishlist(req.user.id);
+    return this.wishlistService.getWishlist(req.user.sub);
   }
 
-  // POST /api/v1/wishlist
   @Post()
   addToWishlist(@Request() req: any, @Body() dto: AddToWishlistDto) {
-    return this.wishlistService.addToWishlist(req.user.id, dto.productId);
+    return this.wishlistService.addToWishlist(req.user.sub, dto.productId);
   }
 
-  // DELETE /api/v1/wishlist/:productId
   @HttpCode(HttpStatus.OK)
   @Delete(':productId')
   removeFromWishlist(@Request() req: any, @Param('productId') productId: string) {
-    return this.wishlistService.removeFromWishlist(req.user.id, productId);
+    return this.wishlistService.removeFromWishlist(req.user.sub, productId);
   }
 
-  // POST /api/v1/wishlist/:productId/move-to-cart
   @HttpCode(HttpStatus.OK)
   @Post(':productId/move-to-cart')
   moveToCart(@Request() req: any, @Param('productId') productId: string) {
-    return this.wishlistService.moveToCart(req.user.id, productId);
+    return this.wishlistService.moveToCart(req.user.sub, productId);
   }
 }

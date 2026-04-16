@@ -25,14 +25,14 @@ export class CartController {
   @UseGuards(OptionalJwtAuthGuard)
   @Get()
   getCart(@Request() req: any, @Session() session: Record<string, any>) {
-    return this.cartService.getCart(req.user?.id ?? null, session);
+    return this.cartService.getCart(req.user?.sub ?? null, session);
   }
 
   // GET /api/v1/cart/count
   @UseGuards(OptionalJwtAuthGuard)
   @Get('count')
   getCount(@Request() req: any, @Session() session: Record<string, any>) {
-    return this.cartService.getCount(req.user?.id ?? null, session);
+    return this.cartService.getCount(req.user?.sub ?? null, session);
   }
 
   // POST /api/v1/cart/items
@@ -44,7 +44,7 @@ export class CartController {
     @Body() dto: AddToCartDto,
   ) {
     return this.cartService.addItem(
-      req.user?.id ?? null,
+      req.user?.sub ?? null,
       dto.productId,
       dto.quantity,
       session,
@@ -61,7 +61,7 @@ export class CartController {
     @Body() dto: UpdateCartItemDto,
   ) {
     return this.cartService.updateItem(
-      req.user?.id ?? null,
+      req.user?.sub ?? null,
       productId,
       dto.quantity,
       session,
@@ -77,7 +77,7 @@ export class CartController {
     @Param('productId') productId: string,
   ) {
     return this.cartService.removeItem(
-      req.user?.id ?? null,
+      req.user?.sub ?? null,
       productId,
       session,
     );
@@ -88,7 +88,7 @@ export class CartController {
   @HttpCode(HttpStatus.OK)
   @Delete()
   clearCart(@Request() req: any, @Session() session: Record<string, any>) {
-    return this.cartService.clearCart(req.user?.id ?? null, session);
+    return this.cartService.clearCart(req.user?.sub ?? null, session);
   }
 
   // POST /api/v1/cart/apply-coupon
@@ -100,7 +100,7 @@ export class CartController {
     @Body() dto: ApplyCouponDto,
   ) {
     return this.cartService.applyCoupon(
-      req.user?.id ?? null,
+      req.user?.sub ?? null,
       dto.couponCode,
       session,
     );
@@ -111,7 +111,7 @@ export class CartController {
   @HttpCode(HttpStatus.OK)
   @Post('remove-coupon')
   removeCoupon(@Request() req: any, @Session() session: Record<string, any>) {
-    return this.cartService.removeCoupon(req.user?.id ?? null, session);
+    return this.cartService.removeCoupon(req.user?.sub ?? null, session);
   }
 
   // POST /api/v1/cart/save-for-later/:productId
@@ -119,6 +119,6 @@ export class CartController {
   @HttpCode(HttpStatus.OK)
   @Post('save-for-later/:productId')
   saveForLater(@Request() req: any, @Param('productId') productId: string) {
-    return this.cartService.saveForLater(req.user.id, productId);
+    return this.cartService.saveForLater(req.user.sub, productId);
   }
 }
