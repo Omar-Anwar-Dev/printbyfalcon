@@ -50,18 +50,31 @@ export class ProductsService {
   // ── Find all with filters ─────────────────────────────────
   async findAll(filter: ProductFilterDto) {
     const {
-      categoryId, brandId, minPrice, maxPrice,
+      categoryId, categorySlug, brandId, brandSlug,
+      minPrice, maxPrice,
       inStock, hasDiscount, rating,
       sort = 'createdAt', order = 'desc',
       page = 1, limit = 20,
       search,
     } = filter;
 
+    // Resolve slugs to IDs when only slugs are provided
+    let resolvedCategoryId = categoryId;
+    if (!resolvedCategoryId && categorySlug) {
+      const cat = await this.prisma.category.findUnique({ where: { slug: categorySlug }, select: { id: true } });
+      if (cat) resolvedCategoryId = cat.id;
+    }
+    let resolvedBrandId = brandId;
+    if (!resolvedBrandId && brandSlug) {
+      const br = await this.prisma.brand.findUnique({ where: { slug: brandSlug }, select: { id: true } });
+      if (br) resolvedBrandId = br.id;
+    }
+
     const where: Prisma.ProductWhereInput = {
       isActive: true,
       status: ProductStatus.ACTIVE,
-      ...(categoryId && { categoryId }),
-      ...(brandId && { brandId }),
+      ...(resolvedCategoryId && { categoryId: resolvedCategoryId }),
+      ...(resolvedBrandId && { brandId: resolvedBrandId }),
       ...(inStock && { stock: { gt: 0 } }),
       ...(hasDiscount && { salePrice: { not: null } }),
       ...(rating && { rating: { gte: rating } }),

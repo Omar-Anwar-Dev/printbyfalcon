@@ -8,7 +8,15 @@ export class ProductFilterDto {
 
   @IsOptional()
   @IsString()
+  categorySlug?: string;
+
+  @IsOptional()
+  @IsString()
   brandId?: string;
+
+  @IsOptional()
+  @IsString()
+  brandSlug?: string;
 
   @IsOptional()
   @IsNumber()
