@@ -1,0 +1,59 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "cart": "Cart",
+    "account": "My Account",
+    "login": "Login",
+    "logout": "Logout",
+    "search": "Search products..."
+  },
+  "home": {
+    "heroTitle": "Professional Printing Supplies",
+    "heroSubtitle": "Everything you need for your printing projects at the best prices",
+    "shopNow": "Shop Now",
+    "featuredProducts": "Featured Products",
+    "viewAll": "View All"
+  },
+  "products": {
+    "title": "All Products",
+    "filterBy": "Filter",
+    "sortBy": "Sort By",
+    "noResults": "No products found",
+    "addToCart": "Add to Cart",
+    "outOfStock": "Out of Stock",
+    "inStock": "In Stock",
+    "price": "Price",
+    "category": "Category",
+    "brand": "Brand",
+    "priceRange": "Price Range"
+  },
+  "product": {
+    "sku": "SKU",
+    "stock": "Stock",
+    "quantity": "Quantity",
+    "addToCart": "Add to Cart",
+    "addToWishlist": "Add to Wishlist",
+    "description": "Description",
+    "specifications": "Specifications",
+    "reviews": "Reviews"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "checkout": "Checkout",
+    "continueShopping": "Continue Shopping",
+    "remove": "Remove",
+    "quantity": "Quantity"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "egp": "EGP",
+    "free": "Free",
+    "viewDetails": "View Details"
+  }
+}

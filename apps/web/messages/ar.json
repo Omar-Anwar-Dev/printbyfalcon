@@ -1,0 +1,59 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "products": "المنتجات",
+    "cart": "السلة",
+    "account": "حسابي",
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "search": "بحث عن منتجات..."
+  },
+  "home": {
+    "heroTitle": "مستلزمات الطباعة الاحترافية",
+    "heroSubtitle": "كل ما تحتاجه لمشاريع الطباعة بأفضل الأسعار",
+    "shopNow": "تسوق الآن",
+    "featuredProducts": "منتجات مميزة",
+    "viewAll": "عرض الكل"
+  },
+  "products": {
+    "title": "جميع المنتجات",
+    "filterBy": "تصفية",
+    "sortBy": "ترتيب حسب",
+    "noResults": "لا توجد منتجات",
+    "addToCart": "أضف للسلة",
+    "outOfStock": "غير متوفر",
+    "inStock": "متوفر",
+    "price": "السعر",
+    "category": "الفئة",
+    "brand": "الماركة",
+    "priceRange": "نطاق السعر"
+  },
+  "product": {
+    "sku": "الكود",
+    "stock": "المخزون",
+    "quantity": "الكمية",
+    "addToCart": "أضف للسلة",
+    "addToWishlist": "أضف للمفضلة",
+    "description": "الوصف",
+    "specifications": "المواصفات",
+    "reviews": "التقييمات"
+  },
+  "cart": {
+    "title": "سلة التسوق",
+    "empty": "السلة فارغة",
+    "subtotal": "المجموع",
+    "shipping": "الشحن",
+    "total": "الإجمالي",
+    "checkout": "إتمام الشراء",
+    "continueShopping": "مواصلة التسوق",
+    "remove": "حذف",
+    "quantity": "الكمية"
+  },
+  "common": {
+    "loading": "جارٍ التحميل...",
+    "error": "حدث خطأ",
+    "egp": "ج.م",
+    "free": "مجاناً",
+    "viewDetails": "عرض التفاصيل"
+  }
+}
