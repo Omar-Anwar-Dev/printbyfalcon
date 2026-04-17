@@ -20,16 +20,13 @@ test.describe('Catalog', () => {
 
   test('Product detail page renders full info + JSON-LD', async ({ page }) => {
     await page.goto('/en/products/hp-680-black-ink');
-    await expect(page.getByRole('heading', { name: /HP 680 Black Ink Cartridge/i })).toBeVisible();
+    // Page is now force-dynamic so it SSRs fresh every request
+    await expect(page.getByRole('heading', { name: /HP 680 Black Ink Cartridge/i })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/SKU/i).first()).toBeVisible();
-    await expect(page.getByText(/HP-680-BK/)).toBeVisible();
-    // Multiple Add-to-Cart buttons exist (hero + related product cards)
+    await expect(page.getByText(/HP-680-BK/).first()).toBeVisible();
     await expect(page.getByRole('button', { name: /Add to Cart/i }).first()).toBeVisible();
-
-    // Breadcrumbs present
     await expect(page.getByText(/Home/).first()).toBeVisible();
 
-    // JSON-LD structured data
     const ldScript = page.locator('script[type="application/ld+json"]').first();
     const ldText = await ldScript.textContent();
     expect(ldText).toContain('"@type":"Product"');
@@ -38,7 +35,9 @@ test.describe('Catalog', () => {
 
   test('Related Products section on detail page', async ({ page }) => {
     await page.goto('/en/products/hp-680-black-ink');
-    await expect(page.getByRole('heading', { name: /Compatible Products/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /HP 680 Black Ink Cartridge/i })).toBeVisible({ timeout: 15_000 });
+    // Compatible Products section appears when related results exist
+    await expect(page.getByRole('heading', { name: /Compatible Products/i })).toBeVisible({ timeout: 10_000 });
   });
 
   test('Pagination controls appear when results exceed one page', async ({ page }) => {

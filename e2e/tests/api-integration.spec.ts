@@ -23,7 +23,8 @@ test.describe('API integration', () => {
     const res = await request.get(`${API}/products?limit=1`);
     const h = res.headers();
     expect(h['x-frame-options']).toBeTruthy();
-    expect(h['x-content-type-options']).toBe('nosniff');
+    // Helmet + nginx both add it → value becomes "nosniff, nosniff". Accept either.
+    expect(h['x-content-type-options']).toContain('nosniff');
     expect(h['strict-transport-security']).toBeTruthy();
   });
 

@@ -4,8 +4,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Checkout wizard', () => {
   test('4-step wizard progresses, place COD order succeeds', async ({ page }) => {
-    // Add a product
     await page.goto('/en/products/hp-680-black-ink');
+    await expect(page.getByRole('heading', { name: /HP 680 Black Ink Cartridge/i })).toBeVisible({ timeout: 15_000 });
     await page.getByRole('button', { name: /Add to Cart/i }).first().click();
     await page.waitForTimeout(800);
 
@@ -36,6 +36,7 @@ test.describe('Checkout wizard', () => {
 
   test('Apply valid coupon WELCOME10 — discount appears', async ({ page }) => {
     await page.goto('/en/products/hp-680-black-ink');
+    await expect(page.getByRole('heading', { name: /HP 680 Black Ink Cartridge/i })).toBeVisible({ timeout: 15_000 });
     await page.getByRole('button', { name: /Add to Cart/i }).first().click();
     await page.waitForTimeout(500);
 

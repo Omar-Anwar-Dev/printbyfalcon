@@ -11,7 +11,10 @@ interface Props {
   params: { locale: string; slug: string };
 }
 
-export const revalidate = 3600;
+// Was `revalidate = 3600` but that caches transient 404s (when API is slow
+// during container boot) for a full hour. Dynamic rendering keeps content
+// fresh and avoids cache-poisoning scenarios.
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params: { locale, slug } }: Props): Promise<Metadata> {
   try {

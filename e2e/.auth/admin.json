@@ -1,0 +1,39 @@
+{
+  "cookies": [
+    {
+      "name": "pbf.sid",
+      "value": "s%3AAS-oF88_M4TCec5b7IKLomGrGE4KXA8e.W4NWvsIiuKrgKFHNYPFkI4MK9VJROWq%2F9MuQ0f6lTgU",
+      "domain": "api.printbyfalcon.com",
+      "path": "/",
+      "expires": 1776521538.617279,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "NEXT_LOCALE",
+      "value": "en",
+      "domain": "printbyfalcon.com",
+      "path": "/",
+      "expires": 1807971139.527961,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://printbyfalcon.com",
+      "localStorage": [
+        {
+          "name": "pbf-auth",
+          "value": "{\"state\":{\"user\":{\"id\":\"a585cceb-d3e4-4da0-9605-3fdfb2b1ed49\",\"email\":\"admin@printbyfalcon.com\",\"phone\":null,\"firstName\":\"Super\",\"lastName\":\"Admin\",\"role\":\"SUPERADMIN\",\"isActive\":true,\"isVerified\":true,\"createdAt\":\"2026-04-16T11:31:39.709Z\",\"updatedAt\":\"2026-04-17T04:15:19.569Z\"},\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNTg1Y2NlYi1kM2U0LTRkYTAtOTYwNS0zZmRmYjJiMWVkNDkiLCJlbWFpbCI6ImFkbWluQHByaW50YnlmYWxjb24uY29tIiwicm9sZSI6IlNVUEVSQURNSU4iLCJpYXQiOjE3NzY0MzUxMzgsImV4cCI6MTc3NjQzNjAzOH0.dbzn_RiMYDnX1ii072kebKplOMK1DZjbyP3cTHpLfZY\",\"isAuthenticated\":true},\"version\":0}"
+        },
+        {
+          "name": "access_token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNTg1Y2NlYi1kM2U0LTRkYTAtOTYwNS0zZmRmYjJiMWVkNDkiLCJlbWFpbCI6ImFkbWluQHByaW50YnlmYWxjb24uY29tIiwicm9sZSI6IlNVUEVSQURNSU4iLCJpYXQiOjE3NzY0MzUxMzgsImV4cCI6MTc3NjQzNjAzOH0.dbzn_RiMYDnX1ii072kebKplOMK1DZjbyP3cTHpLfZY"
+        }
+      ]
+    }
+  ]
+}
