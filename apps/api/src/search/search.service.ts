@@ -268,7 +268,7 @@ export class SearchService implements OnModuleInit, OnModuleDestroy {
   async indexProduct(product: any) {
     try {
       const document = this.transformProduct(product);
-      await this.client.index(this.INDEX_NAME).addDocuments([document]);
+      await this.client.index(this.INDEX_NAME).addDocuments([document], { primaryKey: 'id' });
     } catch (error: any) {
       this.logger.warn(`Could not index product ${product.id}: ${error.message}`);
     }
@@ -278,7 +278,7 @@ export class SearchService implements OnModuleInit, OnModuleDestroy {
   async updateProduct(product: any) {
     try {
       const document = this.transformProduct(product);
-      await this.client.index(this.INDEX_NAME).updateDocuments([document]);
+      await this.client.index(this.INDEX_NAME).updateDocuments([document], { primaryKey: 'id' });
     } catch (error: any) {
       this.logger.warn(`Could not update product ${product.id}: ${error.message}`);
     }
@@ -315,9 +315,12 @@ export class SearchService implements OnModuleInit, OnModuleDestroy {
 
       try {
         const documents = products.map((p: any) => this.transformProduct(p));
-        await this.client.index(this.INDEX_NAME).addDocuments(documents);
+        const task = await this.client.index(this.INDEX_NAME).addDocuments(documents, { primaryKey: 'id' });
+        // Wait for the task to complete so the count reflects actual indexing
+        await this.client.waitForTask(task.taskUid, { timeOutMs: 30000 });
         synced += products.length;
-      } catch {
+      } catch (err: any) {
+        this.logger.warn(`Bulk sync batch failed: ${err.message}`);
         errors += products.length;
       }
 
