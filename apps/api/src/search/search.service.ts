@@ -294,7 +294,7 @@ export class SearchService implements OnModuleInit, OnModuleDestroy {
   }
 
   // ── Bulk sync all products ────────────────────────────────
-  async bulkSync(): Promise<{ synced: number; errors: number }> {
+  async bulkSync(): Promise<{ synced: number; errors: number; actuallyIndexed?: number }> {
     let synced = 0;
     let errors = 0;
     const batchSize = 500;
@@ -315,9 +315,7 @@ export class SearchService implements OnModuleInit, OnModuleDestroy {
 
       try {
         const documents = products.map((p: any) => this.transformProduct(p));
-        const task = await this.client.index(this.INDEX_NAME).addDocuments(documents, { primaryKey: 'id' });
-        // Wait for the task to complete so the count reflects actual indexing
-        await this.client.waitForTask(task.taskUid, { timeOutMs: 30000 });
+        await this.client.index(this.INDEX_NAME).addDocuments(documents, { primaryKey: 'id' });
         synced += products.length;
       } catch (err: any) {
         this.logger.warn(`Bulk sync batch failed: ${err.message}`);
@@ -328,8 +326,18 @@ export class SearchService implements OnModuleInit, OnModuleDestroy {
       if (products.length < batchSize) break;
     }
 
-    this.logger.log(`Bulk sync complete: ${synced} synced, ${errors} errors`);
-    return { synced, errors };
+    // Give Meilisearch a moment to process the async indexing tasks, then verify
+    await new Promise((r) => setTimeout(r, 2000));
+    let actuallyIndexed: number | undefined;
+    try {
+      const stats = await this.client.index(this.INDEX_NAME).getStats();
+      actuallyIndexed = stats.numberOfDocuments;
+    } catch {
+      // ignore
+    }
+
+    this.logger.log(`Bulk sync complete: synced=${synced}, errors=${errors}, indexedInMeili=${actuallyIndexed ?? 'unknown'}`);
+    return { synced, errors, actuallyIndexed };
   }
 
   // ── Get popular search terms ──────────────────────────────
