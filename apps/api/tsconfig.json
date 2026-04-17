@@ -15,6 +15,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "exclude": ["node_modules", "dist", "prisma/seed.ts", "**/*.spec.ts"]
+  "exclude": ["node_modules", "dist", "prisma/**/*", "**/*.spec.ts"]
 }
 
