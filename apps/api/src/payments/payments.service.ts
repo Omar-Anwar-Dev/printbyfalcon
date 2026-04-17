@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrdersService } from '../orders/orders.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PaymentMethod, OrderStatus, PaymentStatus } from '@prisma/client';
 import * as crypto from 'crypto';
 import axios from 'axios';
@@ -22,6 +23,7 @@ export class PaymentsService {
     private prisma: PrismaService,
     @Inject(forwardRef(() => OrdersService))
     private ordersService: OrdersService,
+    private notifications: NotificationsService,
   ) {}
 
   // ── Step 1: Get Paymob auth token ─────────────────────
@@ -252,6 +254,13 @@ export class PaymentsService {
       });
 
       this.logger.log(`Order ${payment.orderId} payment confirmed`);
+      // Notify customer about payment confirmation (fire-and-forget)
+      this.prisma.order
+        .findUnique({ where: { id: payment.orderId }, include: { user: true, items: true } })
+        .then((enriched) => {
+          if (enriched) this.notifications.notifyPaymentConfirmed(enriched).catch(() => {});
+        })
+        .catch((e) => this.logger.error('Payment notification fetch failed:', e.message));
     } else if (!success && !pending) {
       // Payment failed — restore stock
       await this.prisma.payment.update({
