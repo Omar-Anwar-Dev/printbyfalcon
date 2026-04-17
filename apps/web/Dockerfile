@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-ARG NEXT_PUBLIC_API_URL=https://api.printbyfalcon.com
+ARG NEXT_PUBLIC_API_URL=https://api.printbyfalcon.com/api/v1
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 RUN npm run build
 

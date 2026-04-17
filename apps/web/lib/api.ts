@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.printbyfalcon.com';
+// Include /api/v1 in the base URL — the backend mounts all routes under that prefix.
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.printbyfalcon.com/api/v1';
 
 export const api = axios.create({
   baseURL: API_URL,
