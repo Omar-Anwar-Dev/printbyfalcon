@@ -16,6 +16,10 @@ import { PaymentsModule } from './payments/payments.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AdminModule } from './admin/admin.module';
 import { UsersModule } from './users/users.module';
+import { SupportModule } from './support/support.module';
+import { CouponsModule } from './coupons/coupons.module';
+import { SuppliersModule } from './suppliers/suppliers.module';
+import { BannersModule } from './banners/banners.module';
 
 @Module({
   imports: [
@@ -38,6 +42,10 @@ import { UsersModule } from './users/users.module';
     NotificationsModule,
     AdminModule,
     UsersModule,
+    SupportModule,
+    CouponsModule,
+    SuppliersModule,
+    BannersModule,
   ],
 })
 export class AppModule {}
