@@ -1,13 +1,14 @@
 {
   "name": "printbyfalcon",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": ["apps/*", "packages/*", "e2e"],
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "test:e2e": "npm -w @printbyfalcon/e2e run test"
   },
   "packageManager": "npm@11.11.0",
   "devDependencies": {

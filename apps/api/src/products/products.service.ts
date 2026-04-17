@@ -13,13 +13,19 @@ import { StockAdjustmentDto } from './dto/stock-adjustment.dto';
 import { UploadService } from '../upload/upload.service';
 import slugify from 'slugify';
 import { Prisma, ProductStatus } from '@prisma/client';
+import { CacheService } from '../common/cache/cache.service';
 
 @Injectable()
 export class ProductsService {
   constructor(
     private prisma: PrismaService,
     private uploadService: UploadService,
+    private cache: CacheService,
   ) {}
+
+  private async invalidateProductCaches() {
+    await this.cache.del('products:featured:*');
+  }
 
   // ── Create product ────────────────────────────────────────
   async create(dto: CreateProductDto) {
@@ -149,11 +155,13 @@ export class ProductsService {
   // ── Update ────────────────────────────────────────────────
   async update(id: string, dto: UpdateProductDto) {
     await this.findById(id);
-    return this.prisma.product.update({
+    const product = await this.prisma.product.update({
       where: { id },
       data: dto,
       include: { category: true, brand: true, images: true },
     });
+    await this.invalidateProductCaches();
+    return product;
   }
 
   // ── Delete (soft) ─────────────────────────────────────────
@@ -210,17 +218,19 @@ export class ProductsService {
     return updatedProduct;
   }
 
-  // ── Get featured products ─────────────────────────────────
+  // ── Get featured products (cached 5 min) ──────────────────
   async getFeatured(limit: number = 8) {
-    return this.prisma.product.findMany({
-      where: { isActive: true, status: ProductStatus.ACTIVE, stock: { gt: 0 } },
-      orderBy: { soldCount: 'desc' },
-      take: limit,
-      include: {
-        brand: { select: { nameEn: true, nameAr: true, logoUrl: true } },
-        images: { orderBy: { sortOrder: 'asc' }, take: 1 },
-      },
-    });
+    return this.cache.remember(`products:featured:${limit}`, 300, () =>
+      this.prisma.product.findMany({
+        where: { isActive: true, status: ProductStatus.ACTIVE, stock: { gt: 0 } },
+        orderBy: { soldCount: 'desc' },
+        take: limit,
+        include: {
+          brand: { select: { nameEn: true, nameAr: true, logoUrl: true } },
+          images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+        },
+      }),
+    );
   }
 
   // ── Compatible products (cartridge ↔ printer) ────────────

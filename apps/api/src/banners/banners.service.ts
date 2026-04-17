@@ -1,31 +1,38 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBannerDto, UpdateBannerDto } from './dto/create-banner.dto';
+import { CacheService } from '../common/cache/cache.service';
 
 @Injectable()
 export class BannersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private cache: CacheService) {}
 
-  // Public: active banners within date range
+  private async invalidate() {
+    await this.cache.del('banners:*');
+  }
+
+  // Public: active banners within date range (cached 5 min)
   async findActive() {
-    const now = new Date();
-    return this.prisma.banner.findMany({
-      where: {
-        isActive: true,
-        OR: [
-          { startsAt: null, endsAt: null },
-          { startsAt: { lte: now }, endsAt: null },
-          { startsAt: null, endsAt: { gte: now } },
-          { startsAt: { lte: now }, endsAt: { gte: now } },
-        ],
-      },
-      orderBy: { sortOrder: 'asc' },
+    return this.cache.remember('banners:active', 300, () => {
+      const now = new Date();
+      return this.prisma.banner.findMany({
+        where: {
+          isActive: true,
+          OR: [
+            { startsAt: null, endsAt: null },
+            { startsAt: { lte: now }, endsAt: null },
+            { startsAt: null, endsAt: { gte: now } },
+            { startsAt: { lte: now }, endsAt: { gte: now } },
+          ],
+        },
+        orderBy: { sortOrder: 'asc' },
+      });
     });
   }
 
   // Admin CRUD
   async create(dto: CreateBannerDto) {
-    return this.prisma.banner.create({
+    const banner = await this.prisma.banner.create({
       data: {
         imageUrl: dto.imageUrl,
         linkUrl: dto.linkUrl,
@@ -37,6 +44,8 @@ export class BannersService {
         endsAt: dto.endsAt ? new Date(dto.endsAt) : null,
       },
     });
+    await this.invalidate();
+    return banner;
   }
 
   async findAll() {
@@ -47,7 +56,7 @@ export class BannersService {
     const banner = await this.prisma.banner.findUnique({ where: { id } });
     if (!banner) throw new NotFoundException('Banner not found');
 
-    return this.prisma.banner.update({
+    const updated = await this.prisma.banner.update({
       where: { id },
       data: {
         ...(dto.imageUrl !== undefined && { imageUrl: dto.imageUrl }),
@@ -60,11 +69,15 @@ export class BannersService {
         ...(dto.endsAt !== undefined && { endsAt: dto.endsAt ? new Date(dto.endsAt) : null }),
       },
     });
+    await this.invalidate();
+    return updated;
   }
 
   async remove(id: string) {
     const banner = await this.prisma.banner.findUnique({ where: { id } });
     if (!banner) throw new NotFoundException('Banner not found');
-    return this.prisma.banner.delete({ where: { id } });
+    const result = await this.prisma.banner.delete({ where: { id } });
+    await this.invalidate();
+    return result;
   }
 }

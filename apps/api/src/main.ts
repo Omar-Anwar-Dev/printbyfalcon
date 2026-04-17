@@ -1,6 +1,11 @@
+// MUST be first import — Sentry needs to initialise before any other module runs
+import { initSentry, Sentry } from './common/sentry/sentry';
+initSentry();
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ConfigService } from '@nestjs/config';
 import * as session from 'express-session';
 import helmet from 'helmet';
@@ -14,6 +19,11 @@ async function bootstrap() {
   // Trust nginx as reverse proxy so req.ip reflects the real client IP
   // (needed for rate limiter and audit logs)
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
+  // ─── Sentry request handler (must be BEFORE other middleware) ────────────
+  if (process.env.SENTRY_DSN) {
+    app.use(Sentry.Handlers.requestHandler());
+  }
 
   // ─── Security: Helmet headers ─────────────────────────────────────────────
   app.use(
@@ -55,6 +65,8 @@ async function bootstrap() {
     }),
   );
 
+  app.useGlobalInterceptors(new LoggingInterceptor());
+
   app.enableCors({
     origin: [
       'https://printbyfalcon.com',
@@ -65,6 +77,11 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('api/v1');
+
+  // ─── Sentry error handler (must come AFTER routes are registered) ────────
+  if (process.env.SENTRY_DSN) {
+    app.use(Sentry.Handlers.errorHandler());
+  }
 
   const port = configService.get<number>('PORT') || 4000;
   await app.listen(port);

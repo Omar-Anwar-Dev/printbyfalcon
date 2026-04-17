@@ -23,10 +23,12 @@ import { SuppliersModule } from './suppliers/suppliers.module';
 import { BannersModule } from './banners/banners.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { CacheModule } from './common/cache/cache.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    CacheModule,
     ThrottlerModule.forRoot([
       { name: 'default', ttl: 60_000, limit: 100 },
       { name: 'auth', ttl: 15 * 60_000, limit: 5 },

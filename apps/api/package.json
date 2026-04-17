@@ -37,6 +37,7 @@
     "exceljs": "^4.4.0",
     "express-session": "^1.19.0",
     "helmet": "^8.1.0",
+    "@sentry/node": "^7.120.0",
     "ioredis": "^5.10.1",
     "meilisearch": "^0.57.0",
     "minio": "^8.0.7",
