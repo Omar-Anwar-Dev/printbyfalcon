@@ -20,6 +20,7 @@ import { SupportModule } from './support/support.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { BannersModule } from './banners/banners.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { BannersModule } from './banners/banners.module';
     CouponsModule,
     SuppliersModule,
     BannersModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}
