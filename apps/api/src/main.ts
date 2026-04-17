@@ -11,6 +11,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
+  // Trust nginx as reverse proxy so req.ip reflects the real client IP
+  // (needed for rate limiter and audit logs)
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   // ─── Security: Helmet headers ─────────────────────────────────────────────
   app.use(
     helmet({
