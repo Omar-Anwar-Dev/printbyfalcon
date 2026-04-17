@@ -54,13 +54,16 @@ export class AuthService {
   async login(user: any, session?: Record<string, any>) {
     const tokens = await this.generateTokens(user.id, user.email, user.role);
     await this.saveRefreshToken(user.id, tokens.refreshToken);
-    
-    // Merge any guest cart items into the user's DB cart
+
     if (session) {
       await this.cartService.mergeGuestCartOnLogin(user.id, session);
     }
-    
-    return tokens;
+
+    // Frontend stores user in Zustand (welcome text, role-gated UI)
+    return {
+      user: this.sanitizeUser(user),
+      ...tokens,
+    };
   }
 
   // ── Validate user (used by LocalStrategy) ─────────────────
