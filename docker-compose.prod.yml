@@ -95,6 +95,10 @@ services:
       dockerfile: Dockerfile
     restart: always
     env_file: .env
+    environment:
+      # Server-side fetches use the internal docker network — bypasses nginx,
+      # no SSL, no shared rate-limit bucket. Browser code still uses NEXT_PUBLIC_API_URL.
+      - INTERNAL_API_URL=http://nestjs-api:4000/api/v1
     depends_on:
       - nestjs-api
     networks:

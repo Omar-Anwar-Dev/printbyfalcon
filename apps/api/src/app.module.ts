@@ -30,7 +30,9 @@ import { CacheModule } from './common/cache/cache.module';
     ConfigModule.forRoot({ isGlobal: true }),
     CacheModule,
     ThrottlerModule.forRoot([
-      { name: 'default', ttl: 60_000, limit: 100 },
+      // Generous default for storefront browsing (100 products × navbar refetch
+      // on focus can burn 100/min fast). Only auth routes need the tight lock.
+      { name: 'default', ttl: 60_000, limit: 600 },
       { name: 'auth', ttl: 15 * 60_000, limit: 5 },
     ]),
     PrismaModule,

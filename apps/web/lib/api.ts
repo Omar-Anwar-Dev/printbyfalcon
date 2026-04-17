@@ -1,7 +1,13 @@
 import axios from 'axios';
 
-// Include /api/v1 in the base URL — the backend mounts all routes under that prefix.
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.printbyfalcon.com/api/v1';
+// Two URLs:
+//   - server-side (SSR, sitemap, etc.): use the internal docker hostname so we
+//     bypass nginx entirely (no SSL overhead, no shared rate-limit bucket)
+//   - browser/client: must use the public HTTPS URL
+const isServer = typeof window === 'undefined';
+const API_URL = isServer
+  ? (process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://nestjs-api:4000/api/v1')
+  : (process.env.NEXT_PUBLIC_API_URL ?? 'https://api.printbyfalcon.com/api/v1');
 
 export const api = axios.create({
   baseURL: API_URL,
