@@ -13,10 +13,10 @@ export class AnalyticsService {
         status: { in: [OrderStatus.DELIVERED, OrderStatus.SHIPPED, OrderStatus.OUT_FOR_DELIVERY, OrderStatus.PROCESSING] },
         createdAt: { gte: from, lte: to },
       },
-      select: { total: true, createdAt: true },
+      select: { totalAmount: true, createdAt: true },
     });
 
-    const revenue = orders.reduce((sum, o) => sum + Number(o.total), 0);
+    const revenue = orders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
     const orderCount = orders.length;
     const avgOrderValue = orderCount > 0 ? revenue / orderCount : 0;
 
@@ -51,7 +51,7 @@ export class AnalyticsService {
       if (!cat) continue;
       const key = cat.id;
       const existing = map.get(key) ?? { categoryId: cat.id, nameEn: cat.nameEn, nameAr: cat.nameAr, revenue: 0, units: 0 };
-      existing.revenue += Number(item.price) * item.quantity;
+      existing.revenue += Number(item.unitPrice) * item.quantity;
       existing.units += item.quantity;
       map.set(key, existing);
     }
@@ -83,13 +83,19 @@ export class AnalyticsService {
 
   // ── Top searches ──────────────────────────────────────
   async getTopSearches(limit = 20) {
+    // Count how many times each query appears, then sort by frequency
     const searches = await this.prisma.searchAnalytics.groupBy({
       by: ['query'],
-      _sum: { count: true },
-      orderBy: { _sum: { count: 'desc' } },
+      _count: { query: true },
+      _sum: { resultsCount: true },
+      orderBy: { _count: { query: 'desc' } },
       take: limit,
     });
-    return searches.map((s) => ({ query: s.query, count: s._sum.count ?? 0 }));
+    return searches.map((s) => ({
+      query: s.query,
+      searchCount: s._count.query,
+      avgResults: s._sum.resultsCount ?? 0,
+    }));
   }
 
   // ── Dashboard summary ─────────────────────────────────
@@ -144,13 +150,13 @@ export class AnalyticsService {
         status: { in: [OrderStatus.DELIVERED, OrderStatus.SHIPPED, OrderStatus.OUT_FOR_DELIVERY, OrderStatus.PROCESSING] },
         createdAt: { gte: from, lte: to },
       },
-      select: { total: true, createdAt: true },
+      select: { totalAmount: true, createdAt: true },
     });
 
     const map = new Map<string, number>();
     for (const order of orders) {
       const day = order.createdAt.toISOString().split('T')[0];
-      map.set(day, (map.get(day) ?? 0) + Number(order.total));
+      map.set(day, (map.get(day) ?? 0) + Number(order.totalAmount));
     }
 
     const result: { date: string; revenue: number }[] = [];
