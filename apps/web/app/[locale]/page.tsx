@@ -7,6 +7,9 @@ interface Props {
   params: { locale: string };
 }
 
+// Re-render at most every 60 seconds — picks up new products/banners quickly
+export const revalidate = 60;
+
 export default async function HomePage({ params: { locale } }: Props) {
   const t = await getTranslations('home');
 

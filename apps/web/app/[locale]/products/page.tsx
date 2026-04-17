@@ -3,6 +3,9 @@ import { ProductCard } from '../../../components/ui/ProductCard';
 import { fetchCategories, fetchProducts } from '../../../lib/api';
 import Link from 'next/link';
 
+// Force dynamic rendering — filters change per request, inventory changes often
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: { locale: string };
   searchParams: {
