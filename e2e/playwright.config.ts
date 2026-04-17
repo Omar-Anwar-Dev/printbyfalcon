@@ -1,13 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as path from 'path';
+
+const customerAuth = path.join(__dirname, '.auth/customer.json');
+const adminAuth = path.join(__dirname, '.auth/admin.json');
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: '.',
   timeout: 60_000,
   expect: { timeout: 8_000 },
-  fullyParallel: false,         // auth flows touch shared state — run serial
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
-  workers: process.env.CI ? 2 : 1,
+  workers: 1,
   reporter: [
     ['list'],
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
@@ -21,15 +25,46 @@ export default defineConfig({
   },
 
   projects: [
+    // 1. Setup — logs in ONCE as customer + admin, persists auth state
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-      testIgnore: /responsive\.spec\.ts/,
+      name: 'setup',
+      testMatch: /auth\.setup\.ts$/,
     },
+
+    // 2. Public / guest tests — no auth state
+    {
+      name: 'guest',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: /tests\/(homepage|catalog|search|cart|error-pages|api-integration|auth)\.spec\.ts/,
+    },
+
+    // 3. Customer-authenticated tests
+    {
+      name: 'customer',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: customerAuth,
+      },
+      dependencies: ['setup'],
+      testMatch: /tests\/(account|support|checkout)\.spec\.ts/,
+    },
+
+    // 4. Admin-authenticated tests
+    {
+      name: 'admin',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: adminAuth,
+      },
+      dependencies: ['setup'],
+      testMatch: /tests\/admin\.spec\.ts/,
+    },
+
+    // 5. Mobile responsive tests — guest
     {
       name: 'mobile-safari',
       use: { ...devices['iPhone 13'] },
-      testMatch: /responsive\.spec\.ts/,
+      testMatch: /tests\/responsive\.spec\.ts/,
     },
   ],
 });

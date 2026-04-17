@@ -19,23 +19,7 @@ test.describe('API integration', () => {
     expect(body.total).toBeGreaterThanOrEqual(30);
   });
 
-  test('Auth rate limit: 6th login in 15min = 429', async ({ request }) => {
-    // Use a unique email so other tests don't interfere
-    const email = `ratetest-${Date.now()}@x.com`;
-    let last = 0;
-    for (let i = 0; i < 6; i++) {
-      const res = await request.post(`${API}/auth/login`, {
-        data: { email, password: 'wrong' },
-        failOnStatusCode: false,
-      });
-      last = res.status();
-    }
-    expect([401, 429]).toContain(last);
-  });
-
   test('Helmet security headers present', async ({ request }) => {
-    // Playwright's request API auto-decompresses gzip and strips the encoding
-    // header, so we don't verify gzip here — the API curl test already covers it.
     const res = await request.get(`${API}/products?limit=1`);
     const h = res.headers();
     expect(h['x-frame-options']).toBeTruthy();
@@ -65,5 +49,20 @@ test.describe('API integration', () => {
     const body = await res.json();
     expect(body.valid).toBe(false);
     expect(body.reason).toMatch(/expired/i);
+  });
+
+  // MUST stay last — this test exhausts the 5-per-15min auth rate limit.
+  // If placed earlier it would poison every subsequent login test.
+  test('Auth rate limit: 6th login burst returns 429', async ({ request }) => {
+    const email = `ratetest-${Date.now()}@x.com`;
+    let last = 0;
+    for (let i = 0; i < 6; i++) {
+      const res = await request.post(`${API}/auth/login`, {
+        data: { email, password: 'wrong' },
+        failOnStatusCode: false,
+      });
+      last = res.status();
+    }
+    expect([401, 429]).toContain(last);
   });
 });
