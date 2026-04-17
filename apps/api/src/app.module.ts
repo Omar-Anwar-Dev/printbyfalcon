@@ -22,6 +22,7 @@ import { CouponsModule } from './coupons/coupons.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { BannersModule } from './banners/banners.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { AddressesModule } from './addresses/addresses.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     SuppliersModule,
     BannersModule,
     AnalyticsModule,
+    AddressesModule,
   ],
   providers: [
     // Apply rate limiting globally to every route (per-IP)

@@ -27,16 +27,11 @@ export function SearchBar() {
 
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2) {
-      setSuggestions([]);
-      return;
-    }
+    if (q.length < 2) { setSuggestions([]); return; }
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await api.get<{ suggestions: Suggestion[] }>('/products/autocomplete', {
-          params: { q },
-        });
+        const res = await api.get<{ suggestions: Suggestion[] }>('/products/autocomplete', { params: { q } });
         setSuggestions(res.data.suggestions ?? []);
       } catch {
         setSuggestions([]);
@@ -68,31 +63,29 @@ export function SearchBar() {
   const showDropdown = open && query.trim().length >= 2;
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-xs">
+    <div ref={containerRef} className="relative w-full">
       <form onSubmit={handleSubmit}>
-        <div className="relative">
-          <MagnifyingGlassIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <div className="relative border-b border-ink/20 focus-within:border-ink transition-colors">
+          <MagnifyingGlassIcon className="absolute top-1/2 left-0 h-4 w-4 -translate-y-1/2 text-ink-ghost" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setOpen(true)}
             placeholder={t('search')}
-            className="w-full rounded-lg bg-white/10 py-2 ps-9 pe-3 text-sm text-white placeholder:text-gray-400 outline-none ring-1 ring-white/20 focus:ring-[#e8b86d]"
+            className="w-full bg-transparent pl-6 pr-2 py-2.5 text-sm text-ink placeholder:text-ink-ghost outline-none"
           />
         </div>
       </form>
 
       {showDropdown && (
-        <div className="absolute top-full z-50 mt-1 w-full rounded-lg bg-white shadow-xl ring-1 ring-black/10 overflow-hidden">
+        <div className="absolute top-full z-50 mt-2 w-full bg-paper-white shadow-card border border-ink/10 max-h-96 overflow-auto">
           {loading ? (
-            <div className="px-4 py-3 text-sm text-gray-400">{locale === 'ar' ? 'جارٍ البحث...' : 'Searching...'}</div>
+            <div className="px-4 py-3 text-sm text-ink-ghost stamp">{locale === 'ar' ? 'جارٍ البحث...' : 'SEARCHING...'}</div>
           ) : suggestions.length === 0 ? (
-            <div className="px-4 py-3 text-sm text-gray-400">
-              {locale === 'ar' ? 'لا توجد نتائج' : 'No results'}
-            </div>
+            <div className="px-4 py-3 text-sm text-ink-ghost stamp">{locale === 'ar' ? 'لا توجد نتائج' : 'NO RESULTS'}</div>
           ) : (
-            <ul>
+            <ul className="divide-y divide-ink/5">
               {suggestions.map((s) => (
                 <li key={s.slug}>
                   <button
@@ -101,23 +94,15 @@ export function SearchBar() {
                       setOpen(false);
                       setQuery('');
                     }}
-                    className="flex w-full items-center gap-3 px-3 py-2 text-start hover:bg-gray-50"
+                    className="flex w-full items-center gap-3 px-3 py-3 text-start hover:bg-paper/50"
                   >
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-gray-100">
-                      {s.imageUrl && (
-                        <Image src={s.imageUrl} alt="" fill className="object-cover" />
-                      )}
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden bg-paper border border-ink/10">
+                      {s.imageUrl && <Image src={s.imageUrl} alt="" fill className="object-cover" />}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-gray-800">
-                        {locale === 'ar' ? s.nameAr : s.nameEn}
-                      </p>
-                      <p className="text-xs text-[#1a1a2e] font-semibold">
-                        {new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-EG', {
-                          style: 'currency',
-                          currency: 'EGP',
-                          minimumFractionDigits: 0,
-                        }).format(Number(s.price))}
+                      <p className="truncate text-sm text-ink">{locale === 'ar' ? s.nameAr : s.nameEn}</p>
+                      <p className="text-xs text-gold-deep mt-0.5 font-mono">
+                        {new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-EG', { style: 'currency', currency: 'EGP', minimumFractionDigits: 0 }).format(Number(s.price))}
                       </p>
                     </div>
                   </button>

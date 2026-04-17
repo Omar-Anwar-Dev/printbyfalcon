@@ -1,56 +1,57 @@
-import { useTranslations, useLocale } from 'next-intl';
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 
 export function Footer() {
   const locale = useLocale();
 
   return (
-    <footer className="bg-[#1a1a2e] text-gray-300">
-      <div className="container mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          <div>
-            <h3 className="mb-3 text-lg font-bold text-white">
-              <span className="text-[#e8b86d]">🦅</span> PrintByFalcon
-            </h3>
-            <p className="text-sm leading-relaxed">
+    <footer className="mt-20 border-t border-ink/10 bg-paper">
+      <div className="container mx-auto px-5 py-16">
+        {/* Oversized wordmark watermark */}
+        <div className="mb-12 text-center overflow-hidden">
+          <h2 className="text-display leading-none tracking-tightest text-ink/[0.08] select-none text-[14vw] md:text-[9rem]">
+            PrintbyFalcon
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-4 pb-10 border-b border-ink/10">
+          <div className="col-span-2">
+            <p className="eyebrow mb-3">{locale === 'ar' ? 'أتيليه الطباعة' : 'Printing Atelier'}</p>
+            <p className="text-sm leading-relaxed text-ink-soft max-w-sm">
               {locale === 'ar'
-                ? 'مستلزمات الطباعة الاحترافية بأفضل الأسعار في مصر'
-                : 'Professional printing supplies at the best prices in Egypt'}
+                ? 'مورّد متخصص في مستلزمات الطباعة الأصلية في مصر. نخدم المكاتب والمصممين والاستوديوهات منذ ٢٠٢٥.'
+                : 'A specialist supplier of genuine printing consumables in Egypt. Serving offices, designers, and studios since 2025.'}
             </p>
           </div>
 
           <div>
-            <h4 className="mb-3 font-semibold text-white">
-              {locale === 'ar' ? 'روابط سريعة' : 'Quick Links'}
-            </h4>
+            <p className="eyebrow mb-3">{locale === 'ar' ? 'الكتالوج' : 'Catalog'}</p>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link href={`/${locale}/products`} className="hover:text-[#e8b86d] transition-colors">
-                  {locale === 'ar' ? 'المنتجات' : 'Products'}
-                </Link>
-              </li>
-              <li>
-                <Link href={`/${locale}/cart`} className="hover:text-[#e8b86d] transition-colors">
-                  {locale === 'ar' ? 'السلة' : 'Cart'}
-                </Link>
-              </li>
+              <li><Link href={`/${locale}/products`} className="hover:text-gold-deep">{locale === 'ar' ? 'المنتجات' : 'All Products'}</Link></li>
+              <li><Link href={`/${locale}/products?category=ink-cartridges`} className="hover:text-gold-deep">{locale === 'ar' ? 'الأحبار' : 'Ink'}</Link></li>
+              <li><Link href={`/${locale}/products?category=printers`} className="hover:text-gold-deep">{locale === 'ar' ? 'الطابعات' : 'Printers'}</Link></li>
+              <li><Link href={`/${locale}/products?category=paper-media`} className="hover:text-gold-deep">{locale === 'ar' ? 'الورق' : 'Paper'}</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="mb-3 font-semibold text-white">
-              {locale === 'ar' ? 'تواصل معنا' : 'Contact'}
-            </h4>
+            <p className="eyebrow mb-3">{locale === 'ar' ? 'الحساب' : 'Account'}</p>
             <ul className="space-y-2 text-sm">
-              <li>📧 info@printbyfalcon.com</li>
-              <li>📍 {locale === 'ar' ? 'القاهرة، مصر' : 'Cairo, Egypt'}</li>
+              <li><Link href={`/${locale}/auth/login`} className="hover:text-gold-deep">{locale === 'ar' ? 'تسجيل الدخول' : 'Sign in'}</Link></li>
+              <li><Link href={`/${locale}/account`} className="hover:text-gold-deep">{locale === 'ar' ? 'حسابي' : 'My account'}</Link></li>
+              <li><Link href={`/${locale}/account/orders`} className="hover:text-gold-deep">{locale === 'ar' ? 'طلباتي' : 'Orders'}</Link></li>
+              <li><Link href={`/${locale}/support`} className="hover:text-gold-deep">{locale === 'ar' ? 'الدعم' : 'Support'}</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-8 border-t border-white/10 pt-6 text-center text-xs text-gray-500">
-          © {new Date().getFullYear()} PrintByFalcon.{' '}
-          {locale === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved.'}
+        <div className="mt-6 flex flex-col items-start justify-between gap-3 text-xs text-ink-soft md:flex-row md:items-center">
+          <div className="stamp">© {new Date().getFullYear()} · PRINTBYFALCON · CAIRO, EGYPT</div>
+          <div className="flex items-center gap-4 stamp">
+            <span>EST. 2025</span>
+            <span className="text-gold">✦</span>
+            <span>info@printbyfalcon.com</span>
+          </div>
         </div>
       </div>
     </footer>
