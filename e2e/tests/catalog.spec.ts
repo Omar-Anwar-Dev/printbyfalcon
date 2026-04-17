@@ -23,7 +23,8 @@ test.describe('Catalog', () => {
     await expect(page.getByRole('heading', { name: /HP 680 Black Ink Cartridge/i })).toBeVisible();
     await expect(page.getByText(/SKU/i).first()).toBeVisible();
     await expect(page.getByText(/HP-680-BK/)).toBeVisible();
-    await expect(page.getByRole('button', { name: /Add to Cart/i })).toBeVisible();
+    // Multiple Add-to-Cart buttons exist (hero + related product cards)
+    await expect(page.getByRole('button', { name: /Add to Cart/i }).first()).toBeVisible();
 
     // Breadcrumbs present
     await expect(page.getByText(/Home/).first()).toBeVisible();

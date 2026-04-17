@@ -52,33 +52,36 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         <div className="grid grid-cols-2 gap-5">
           <div>
-            <label className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الاسم الأول' : 'First name'}</label>
-            <input required value={firstName} onChange={(e) => setFirstName(e.target.value)} className="input-atelier" />
+            <label htmlFor="reg-first" className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الاسم الأول' : 'First name'}</label>
+            <input id="reg-first" name="firstName" required autoComplete="given-name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="input-atelier" />
           </div>
           <div>
-            <label className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الاسم الأخير' : 'Last name'}</label>
-            <input required value={lastName} onChange={(e) => setLastName(e.target.value)} className="input-atelier" />
+            <label htmlFor="reg-last" className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الاسم الأخير' : 'Last name'}</label>
+            <input id="reg-last" name="lastName" required autoComplete="family-name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="input-atelier" />
           </div>
         </div>
 
         <div>
-          <label className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label>
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input-atelier" />
+          <label htmlFor="reg-email" className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label>
+          <input id="reg-email" name="email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-atelier" />
         </div>
 
         <div>
-          <label className="eyebrow block mb-2 text-ink-soft">
+          <label htmlFor="reg-phone" className="eyebrow block mb-2 text-ink-soft">
             {locale === 'ar' ? 'رقم الهاتف (اختياري)' : 'Phone (optional)'}
           </label>
-          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-atelier" placeholder="+20 10 1234 5678" />
+          <input id="reg-phone" name="phone" type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-atelier" placeholder="+20 10 1234 5678" />
         </div>
 
         <div>
-          <label className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'كلمة المرور' : 'Password'}</label>
+          <label htmlFor="reg-password" className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'كلمة المرور' : 'Password'}</label>
           <input
+            id="reg-password"
+            name="password"
             type="password"
             required
             minLength={8}
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="input-atelier"

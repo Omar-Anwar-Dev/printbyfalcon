@@ -48,8 +48,10 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="mt-10 space-y-7">
         <div>
-          <label className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label>
+          <label htmlFor="login-email" className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label>
           <input
+            id="login-email"
+            name="email"
             type="email"
             required
             autoComplete="email"
@@ -62,12 +64,14 @@ export default function LoginPage() {
 
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="eyebrow text-ink-soft">{locale === 'ar' ? 'كلمة المرور' : 'Password'}</label>
+            <label htmlFor="login-password" className="eyebrow text-ink-soft">{locale === 'ar' ? 'كلمة المرور' : 'Password'}</label>
             <Link href={`/${locale}/auth/forgot-password`} className="text-xs text-gold-deep hover:underline">
               {locale === 'ar' ? 'نسيتها؟' : 'Forgot?'}
             </Link>
           </div>
           <input
+            id="login-password"
+            name="password"
             type="password"
             required
             autoComplete="current-password"

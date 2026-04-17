@@ -45,14 +45,14 @@ export default function NewTicketPage() {
         className="space-y-7"
       >
         <div>
-          <label className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الموضوع' : 'Subject'}</label>
-          <input required value={subject} onChange={(e) => setSubject(e.target.value)} className="input-atelier" />
+          <label htmlFor="ticket-subject" className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الموضوع' : 'Subject'}</label>
+          <input id="ticket-subject" name="subject" required value={subject} onChange={(e) => setSubject(e.target.value)} className="input-atelier" />
         </div>
 
         <div className="grid grid-cols-2 gap-5">
           <div>
-            <label className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الفئة' : 'Category'}</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)} className="input-atelier">
+            <label htmlFor="ticket-category" className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الفئة' : 'Category'}</label>
+            <select id="ticket-category" name="category" value={category} onChange={(e) => setCategory(e.target.value)} className="input-atelier">
               <option value="PRODUCT_INQUIRY">{locale === 'ar' ? 'استفسار عن منتج' : 'Product inquiry'}</option>
               <option value="ORDER_ISSUE">{locale === 'ar' ? 'مشكلة في الطلب' : 'Order issue'}</option>
               <option value="TECHNICAL_SUPPORT">{locale === 'ar' ? 'دعم فني' : 'Technical support'}</option>
@@ -60,8 +60,8 @@ export default function NewTicketPage() {
             </select>
           </div>
           <div>
-            <label className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الأولوية' : 'Priority'}</label>
-            <select value={priority} onChange={(e) => setPriority(e.target.value)} className="input-atelier">
+            <label htmlFor="ticket-priority" className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الأولوية' : 'Priority'}</label>
+            <select id="ticket-priority" name="priority" value={priority} onChange={(e) => setPriority(e.target.value)} className="input-atelier">
               <option value="LOW">{locale === 'ar' ? 'منخفضة' : 'Low'}</option>
               <option value="MEDIUM">{locale === 'ar' ? 'متوسطة' : 'Medium'}</option>
               <option value="HIGH">{locale === 'ar' ? 'عالية' : 'High'}</option>
@@ -71,8 +71,10 @@ export default function NewTicketPage() {
         </div>
 
         <div>
-          <label className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الرسالة' : 'Message'}</label>
+          <label htmlFor="ticket-message" className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'الرسالة' : 'Message'}</label>
           <textarea
+            id="ticket-message"
+            name="message"
             required
             rows={6}
             value={message}

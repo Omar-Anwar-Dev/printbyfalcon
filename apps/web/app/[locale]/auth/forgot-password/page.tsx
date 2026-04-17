@@ -63,8 +63,8 @@ export default function ForgotPasswordPage() {
 
       <form onSubmit={handleSubmit} className="mt-10 space-y-7">
         <div>
-          <label className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label>
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input-atelier" />
+          <label htmlFor="fp-email" className="eyebrow block mb-2 text-ink-soft">{locale === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label>
+          <input id="fp-email" name="email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-atelier" />
         </div>
 
         {error && (

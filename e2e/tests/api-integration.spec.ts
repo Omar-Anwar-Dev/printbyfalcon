@@ -33,15 +33,14 @@ test.describe('API integration', () => {
     expect([401, 429]).toContain(last);
   });
 
-  test('Helmet + gzip headers present', async ({ request }) => {
-    const res = await request.get(`${API}/products?limit=1`, {
-      headers: { 'Accept-Encoding': 'gzip' },
-    });
+  test('Helmet security headers present', async ({ request }) => {
+    // Playwright's request API auto-decompresses gzip and strips the encoding
+    // header, so we don't verify gzip here — the API curl test already covers it.
+    const res = await request.get(`${API}/products?limit=1`);
     const h = res.headers();
     expect(h['x-frame-options']).toBeTruthy();
     expect(h['x-content-type-options']).toBe('nosniff');
     expect(h['strict-transport-security']).toBeTruthy();
-    expect(h['content-encoding']).toBe('gzip');
   });
 
   test('Meilisearch synonym: حبر returns ink cartridges', async ({ request }) => {
