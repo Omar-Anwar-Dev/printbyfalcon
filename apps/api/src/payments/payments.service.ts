@@ -281,6 +281,63 @@ export class PaymentsService {
     return { received: true };
   }
 
+  // ── Refund ────────────────────────────────────────────
+  async refundOrder(orderId: string) {
+    const payment = await this.prisma.payment.findFirst({
+      where: { orderId, status: PaymentStatus.SUCCESS },
+    });
+
+    if (!payment) {
+      throw new BadRequestException('No successful payment found for this order');
+    }
+    if (!payment.transactionId) {
+      throw new BadRequestException('Payment transaction ID not found');
+    }
+
+    const apiKey = this.config.get<string>('PAYMOB_API_KEY');
+    if (!apiKey || apiKey === 'your_paymob_api_key_here') {
+      // Mock refund in dev/staging
+      this.logger.log(`[MOCK REFUND] Order ${orderId} — transaction ${payment.transactionId}`);
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: PaymentStatus.REFUNDED },
+      });
+      await this.prisma.order.update({
+        where: { id: orderId },
+        data: { status: OrderStatus.REFUNDED },
+      });
+      await this.prisma.orderTracking.create({
+        data: { orderId, status: OrderStatus.REFUNDED, note: 'Refund processed (mock)' },
+      });
+      return { success: true, message: 'Refund processed (mock mode)' };
+    }
+
+    try {
+      const token = await this.getPaymobToken();
+      const amountCents = Math.round(Number(payment.amount) * 100);
+      await axios.post(
+        `${this.PAYMOB_BASE}/acceptance/void_refund/refund`,
+        { auth_token: token, transaction_id: payment.transactionId, amount_cents: amountCents },
+      );
+
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: PaymentStatus.REFUNDED },
+      });
+      await this.prisma.order.update({
+        where: { id: orderId },
+        data: { status: OrderStatus.REFUNDED },
+      });
+      await this.prisma.orderTracking.create({
+        data: { orderId, status: OrderStatus.REFUNDED, note: 'Refund processed via Paymob' },
+      });
+      return { success: true, message: 'Refund initiated successfully' };
+    } catch (error: any) {
+      this.logger.error('Paymob refund failed:', error?.response?.data || error.message);
+      throw new BadRequestException('Refund failed: ' + (error?.response?.data?.message || error.message));
+    }
+  }
+
   // ── HMAC Validation ───────────────────────────────────
   private validateHmac(body: any, hmacParam: string, secret: string): boolean {
     try {

@@ -2,12 +2,18 @@ import {
   Controller,
   Post,
   Body,
+  Param,
   Query,
+  Request,
   HttpCode,
   HttpStatus,
   Logger,
+  UseGuards,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('payments')
 export class PaymentsController {
@@ -24,5 +30,13 @@ export class PaymentsController {
   ) {
     this.logger.log('Paymob webhook received');
     return this.paymentsService.handleWebhook(body, hmac);
+  }
+
+  // POST /api/v1/admin/orders/:id/refund
+  @Post('/admin/orders/:id/refund')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  async refundOrder(@Param('id') id: string, @Request() req: any) {
+    return this.paymentsService.refundOrder(id);
   }
 }

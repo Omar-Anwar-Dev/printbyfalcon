@@ -82,6 +82,15 @@ export class ProductsController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPERADMIN', 'SALES_MANAGER')
+  @Post('admin/products/bulk-import')
+  @UseInterceptors(FileInterceptor('file'))
+  bulkImport(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new Error('CSV file is required');
+    return this.productsService.bulkImportFromCsv(file.buffer);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
   @Delete('admin/products/:id')
   remove(@Param('id') id: string) {

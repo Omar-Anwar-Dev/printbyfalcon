@@ -2,7 +2,9 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
+import { parseString } from '@fast-csv/parse';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -240,6 +242,72 @@ export class ProductsService {
         soldCount: 0,
         viewCount: 0,
       },
+    });
+  }
+
+  // ── Bulk CSV import ───────────────────────────────────────
+  // CSV columns: nameEn,nameAr,sku,price,stock,categoryId,brandId
+  async bulkImportFromCsv(buffer: Buffer): Promise<{ created: number; skipped: number; errors: string[] }> {
+    const rows = await this.parseCsv(buffer);
+    let created = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (const row of rows) {
+      try {
+        if (!row.nameEn || !row.sku || !row.price) {
+          errors.push(`Row skipped — missing required fields: ${JSON.stringify(row)}`);
+          skipped++;
+          continue;
+        }
+
+        const existingSku = await this.prisma.product.findUnique({ where: { sku: row.sku } });
+        if (existingSku) {
+          errors.push(`SKU already exists: ${row.sku}`);
+          skipped++;
+          continue;
+        }
+
+        const baseSlug = slugify(row.nameEn, { lower: true, strict: true });
+        let slug = baseSlug;
+        let counter = 1;
+        while (await this.prisma.product.findUnique({ where: { slug } })) {
+          slug = `${baseSlug}-${counter++}`;
+        }
+
+        const productData: any = {
+          nameEn: row.nameEn,
+          nameAr: row.nameAr || row.nameEn,
+          descriptionEn: row.descriptionEn || '',
+          descriptionAr: row.descriptionAr || '',
+          slug,
+          sku: row.sku,
+          price: parseFloat(row.price),
+          salePrice: row.salePrice ? parseFloat(row.salePrice) : null,
+          stock: row.stock ? parseInt(row.stock, 10) : 0,
+          status: ProductStatus.DRAFT,
+        };
+        if (row.categoryId) productData.categoryId = row.categoryId;
+        if (row.brandId) productData.brandId = row.brandId;
+
+        await this.prisma.product.create({ data: productData });
+        created++;
+      } catch (err: any) {
+        errors.push(`Error on SKU ${row.sku}: ${err.message}`);
+        skipped++;
+      }
+    }
+
+    return { created, skipped, errors };
+  }
+
+  private parseCsv(buffer: Buffer): Promise<Record<string, string>[]> {
+    return new Promise((resolve, reject) => {
+      const rows: Record<string, string>[] = [];
+      parseString(buffer.toString(), { headers: true, trim: true })
+        .on('data', (row) => rows.push(row))
+        .on('end', () => resolve(rows))
+        .on('error', reject);
     });
   }
 }
