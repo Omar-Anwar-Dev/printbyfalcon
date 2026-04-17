@@ -11,6 +11,7 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -28,6 +29,7 @@ export class AuthController {
     private cartService: CartService,
   ) {}
 
+  @Throttle({ auth: { limit: 5, ttl: 15 * 60_000 } })
   @Post('register')
   async register(
     @Body() dto: RegisterDto,
@@ -41,6 +43,7 @@ export class AuthController {
     return result;
   }
 
+  @Throttle({ auth: { limit: 5, ttl: 15 * 60_000 } })
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -58,6 +61,7 @@ export class AuthController {
     return this.authService.refreshTokens(dto.userId, dto.refreshToken);
   }
 
+  @Throttle({ auth: { limit: 3, ttl: 15 * 60_000 } })
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   forgotPassword(@Body() dto: ForgotPasswordDto) {

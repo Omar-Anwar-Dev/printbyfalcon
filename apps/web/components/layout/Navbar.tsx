@@ -6,6 +6,7 @@ import { useCartStore } from '../../stores/cart.store';
 import { useAuthStore } from '../../stores/auth.store';
 import { ShoppingCartIcon, UserIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
+import { SearchBar } from './SearchBar';
 
 export function Navbar() {
   const t = useTranslations('nav');
@@ -34,6 +35,11 @@ export function Navbar() {
             {t('products')}
           </Link>
         </nav>
+
+        {/* Search bar (desktop) */}
+        <div className="hidden flex-1 px-6 md:block md:max-w-md">
+          <SearchBar />
+        </div>
 
         {/* Actions */}
         <div className="flex items-center gap-3">
@@ -90,6 +96,9 @@ export function Navbar() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="border-t border-white/10 bg-[#1a1a2e] px-4 pb-4 md:hidden">
+          <div className="pt-3">
+            <SearchBar />
+          </div>
           <nav className="flex flex-col gap-3 pt-3">
             <Link href={`/${locale}`} className="text-sm hover:text-[#e8b86d]" onClick={() => setMobileOpen(false)}>
               {t('home')}

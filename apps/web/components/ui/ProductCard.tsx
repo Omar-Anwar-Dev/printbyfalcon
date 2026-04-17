@@ -48,6 +48,11 @@ export function ProductCard({ product }: Props) {
             </span>
           </div>
         )}
+        {inStock && product.stock <= 5 && (
+          <span className="absolute bottom-2 left-2 rounded-md bg-amber-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+            {locale === 'ar' ? `تبقى ${product.stock} فقط!` : `Only ${product.stock} left!`}
+          </span>
+        )}
       </Link>
 
       <div className="flex flex-1 flex-col p-3">

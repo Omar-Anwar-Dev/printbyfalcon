@@ -3,12 +3,21 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as session from 'express-session';
+import helmet from 'helmet';
 import { createClient } from 'redis';
 const { RedisStore } = require('connect-redis');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  // ─── Security: Helmet headers ─────────────────────────────────────────────
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // disabled for iframes (Paymob)
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
 
   // ─── Redis client for sessions ────────────────────────────────────────────
   const redisClient = createClient({
@@ -22,14 +31,14 @@ async function bootstrap() {
       store: new RedisStore({ client: redisClient }),
       secret: configService.get<string>('SESSION_SECRET') || 'falcon-secret-change-me',
       resave: false,
-      saveUninitialized: true,   // creates session for guests immediately
+      saveUninitialized: true,
       cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 1000 * 60 * 60 * 24, // 24 hours for guests
+        maxAge: 1000 * 60 * 60 * 24,
         sameSite: 'lax',
       },
-      name: 'pbf.sid',           // custom cookie name
+      name: 'pbf.sid',
     }),
   );
 
@@ -48,7 +57,7 @@ async function bootstrap() {
       'https://www.printbyfalcon.com',
       'http://localhost:3000',
     ],
-    credentials: true,   // IMPORTANT: allows cookies to be sent cross-origin
+    credentials: true,
   });
 
   app.setGlobalPrefix('api/v1');

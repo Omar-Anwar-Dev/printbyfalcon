@@ -25,7 +25,10 @@ import { AnalyticsModule } from './analytics/analytics.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    ThrottlerModule.forRoot([
+      { name: 'default', ttl: 60_000, limit: 100 },
+      { name: 'auth', ttl: 15 * 60_000, limit: 5 },
+    ]),
     PrismaModule,
     HealthModule,
     AuthModule,

@@ -143,6 +143,43 @@ export class AnalyticsService {
     };
   }
 
+  // ── Abandoned cart rate ───────────────────────────────
+  async getAbandonedCartRate() {
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    // Total non-empty carts older than 24h
+    const totalCarts = await this.prisma.cart.count({
+      where: {
+        updatedAt: { lt: dayAgo },
+        items: { some: {} },
+      },
+    });
+
+    // Of those carts' users, how many have NO order created after that cart's update
+    const carts = await this.prisma.cart.findMany({
+      where: { updatedAt: { lt: dayAgo }, items: { some: {} } },
+      select: { userId: true, updatedAt: true },
+    });
+
+    let abandoned = 0;
+    for (const cart of carts) {
+      if (!cart.userId) { abandoned++; continue; }
+      const hasOrder = await this.prisma.order.findFirst({
+        where: { userId: cart.userId, createdAt: { gte: cart.updatedAt } },
+        select: { id: true },
+      });
+      if (!hasOrder) abandoned++;
+    }
+
+    const rate = totalCarts > 0 ? (abandoned / totalCarts) * 100 : 0;
+    return {
+      totalCarts,
+      abandoned,
+      converted: totalCarts - abandoned,
+      abandonmentRate: Math.round(rate * 100) / 100,
+    };
+  }
+
   // ── Daily revenue chart ───────────────────────────────
   async getDailyRevenue(from: Date, to: Date) {
     const orders = await this.prisma.order.findMany({

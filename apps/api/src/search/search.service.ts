@@ -1,13 +1,17 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import Redis from 'ioredis';
 import { PrismaService } from '../prisma/prisma.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { Meilisearch } = require('meilisearch');
 
 @Injectable()
-export class SearchService implements OnModuleInit {
+export class SearchService implements OnModuleInit, OnModuleDestroy {
   private client: any;
+  private redis: Redis | null = null;
   private readonly INDEX_NAME = 'products';
+  private readonly AUTOCOMPLETE_CACHE_PREFIX = 'ac:';
+  private readonly AUTOCOMPLETE_TTL = 60; // seconds
   private readonly logger = new Logger(SearchService.name);
 
   constructor(
@@ -18,6 +22,19 @@ export class SearchService implements OnModuleInit {
       host: config.get('MEILI_HOST', 'http://meilisearch:7700'),
       apiKey: config.get('MEILI_MASTER_KEY'),
     });
+    const redisUrl = config.get<string>('REDIS_URL');
+    if (redisUrl) {
+      try {
+        this.redis = new Redis(redisUrl, { lazyConnect: false, maxRetriesPerRequest: 1 });
+        this.redis.on('error', (err) => this.logger.warn(`Redis error: ${err.message}`));
+      } catch (err: any) {
+        this.logger.warn(`Redis init failed: ${err.message}`);
+      }
+    }
+  }
+
+  async onModuleDestroy() {
+    if (this.redis) await this.redis.quit().catch(() => {});
   }
 
   // ── Initialize index settings on startup ──────────────────
@@ -204,18 +221,31 @@ export class SearchService implements OnModuleInit {
     }
   }
 
-  // ── Autocomplete ──────────────────────────────────────────
+  // ── Autocomplete (Redis-cached, 60s TTL) ──────────────────
   async autocomplete(q: string) {
-    if (!q || q.trim().length < 2) return { suggestions: [] };
+    const query = q?.trim().toLowerCase() ?? '';
+    if (query.length < 2) return { suggestions: [] };
 
+    const cacheKey = `${this.AUTOCOMPLETE_CACHE_PREFIX}${query}`;
+
+    // Try cache first
+    if (this.redis) {
+      try {
+        const cached = await this.redis.get(cacheKey);
+        if (cached) return JSON.parse(cached);
+      } catch (err: any) {
+        this.logger.warn(`Cache read failed: ${err.message}`);
+      }
+    }
+
+    let payload: any = { suggestions: [] };
     try {
       const result = await this.client.index(this.INDEX_NAME).search(q, {
         limit: 8,
         attributesToRetrieve: ['nameEn', 'nameAr', 'slug', 'imageUrl', 'price'],
         filter: 'isActive = true AND status = "ACTIVE"',
       });
-
-      return {
+      payload = {
         suggestions: result.hits.map((h: any) => ({
           nameEn: h.nameEn,
           nameAr: h.nameAr,
@@ -225,8 +255,13 @@ export class SearchService implements OnModuleInit {
         })),
       };
     } catch {
-      return { suggestions: [] };
+      payload = { suggestions: [] };
     }
+
+    if (this.redis) {
+      this.redis.setex(cacheKey, this.AUTOCOMPLETE_TTL, JSON.stringify(payload)).catch(() => {});
+    }
+    return payload;
   }
 
   // ── Index a single product ────────────────────────────────

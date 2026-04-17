@@ -87,6 +87,9 @@ export const fetchProduct = (slug: string) =>
 export const fetchFeaturedProducts = () =>
   api.get<Product[]>('/products/featured').then((r) => r.data);
 
+export const fetchRelatedProducts = (slug: string, limit = 8) =>
+  api.get<Product[]>(`/products/${slug}/related`, { params: { limit } }).then((r) => r.data);
+
 export const fetchCategories = () =>
   api.get<Category[]>('/categories').then((r) => r.data);
 

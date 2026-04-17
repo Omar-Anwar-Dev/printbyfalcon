@@ -1,14 +1,36 @@
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { fetchProduct } from '../../../../lib/api';
+import { fetchProduct, fetchRelatedProducts } from '../../../../lib/api';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { AddToCartSection } from './AddToCartSection';
+import { Breadcrumbs } from '../../../../components/ui/Breadcrumbs';
+import { ProductCard } from '../../../../components/ui/ProductCard';
 
 interface Props {
   params: { locale: string; slug: string };
 }
 
 export const revalidate = 3600;
+
+export async function generateMetadata({ params: { locale, slug } }: Props): Promise<Metadata> {
+  try {
+    const product = await fetchProduct(slug);
+    const name = locale === 'ar' ? product.nameAr : product.nameEn;
+    const description = (locale === 'ar' ? product.descriptionAr : product.descriptionEn) ?? name;
+    return {
+      title: `${name} — PrintByFalcon`,
+      description,
+      openGraph: {
+        title: name,
+        description,
+        images: product.images?.[0]?.url ? [product.images[0].url] : [],
+      },
+    };
+  } catch {
+    return { title: 'PrintByFalcon' };
+  }
+}
 
 export default async function ProductDetailPage({ params: { locale, slug } }: Props) {
   const t = await getTranslations('product');
@@ -20,13 +42,63 @@ export default async function ProductDetailPage({ params: { locale, slug } }: Pr
     notFound();
   }
 
+  // Fetch related (best-effort — don't block page)
+  const related = await fetchRelatedProducts(slug, 8).catch(() => [] as typeof product extends any ? any[] : any[]);
+
   const name = locale === 'ar' ? product.nameAr : product.nameEn;
   const description = locale === 'ar' ? product.descriptionAr : product.descriptionEn;
   const currentPrice = product.salePrice ?? product.price;
   const isOnSale = product.salePrice != null && Number(product.salePrice) < Number(product.price);
 
+  // JSON-LD structured data for SEO
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name,
+    description: description ?? name,
+    sku: product.sku,
+    image: product.images?.map((i) => i.url) ?? [],
+    brand: product.brand ? {
+      '@type': 'Brand',
+      name: locale === 'ar' ? product.brand.nameAr : product.brand.nameEn,
+    } : undefined,
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'EGP',
+      price: Number(currentPrice),
+      availability: product.stock > 0
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      url: `https://printbyfalcon.com/${locale}/products/${slug}`,
+    },
+    aggregateRating: product.averageRating > 0 ? {
+      '@type': 'AggregateRating',
+      ratingValue: product.averageRating,
+      ratingCount: 1,
+    } : undefined,
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <Breadcrumbs
+        items={[
+          { label: locale === 'ar' ? 'الرئيسية' : 'Home', href: `/${locale}` },
+          { label: locale === 'ar' ? 'المنتجات' : 'Products', href: `/${locale}/products` },
+          ...(product.category
+            ? [{
+                label: locale === 'ar' ? product.category.nameAr : product.category.nameEn,
+                href: `/${locale}/products?category=${product.category.slug}`,
+              }]
+            : []),
+          { label: name },
+        ]}
+      />
+
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         {/* Images */}
         <div className="space-y-3">
@@ -95,6 +167,14 @@ export default async function ProductDetailPage({ params: { locale, slug } }: Pr
             </span>
           </div>
 
+          {product.stock > 0 && product.stock <= 5 && (
+            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800">
+              ⚡ {locale === 'ar'
+                ? `مخزون محدود! تبقى ${product.stock} قطع فقط`
+                : `Limited stock! Only ${product.stock} left`}
+            </div>
+          )}
+
           {/* Add to cart (client component) */}
           <AddToCartSection product={product} locale={locale} />
 
@@ -107,6 +187,20 @@ export default async function ProductDetailPage({ params: { locale, slug } }: Pr
           )}
         </div>
       </div>
+
+      {/* Related products */}
+      {related.length > 0 && (
+        <section className="mt-14 border-t pt-10">
+          <h2 className="mb-5 text-xl font-bold text-[#1a1a2e]">
+            {locale === 'ar' ? 'منتجات متوافقة' : 'Compatible Products'}
+          </h2>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {related.slice(0, 8).map((p: any) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

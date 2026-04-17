@@ -286,19 +286,31 @@ export class OrdersService {
     paymentMethod?: string;
     dateFrom?: string;
     dateTo?: string;
+    customerId?: string;
+    search?: string;
     page?: number;
     limit?: number;
   }) {
-    const { status, paymentMethod, dateFrom, dateTo, page = 1, limit = 20 } = filters;
+    const { status, paymentMethod, dateFrom, dateTo, customerId, search, page = 1, limit = 20 } = filters;
     const skip = (page - 1) * limit;
 
     const where: any = {};
     if (status) where.status = status;
     if (paymentMethod) where.paymentMethod = paymentMethod;
+    if (customerId) where.userId = customerId;
     if (dateFrom || dateTo) {
       where.createdAt = {};
       if (dateFrom) where.createdAt.gte = new Date(dateFrom);
       if (dateTo) where.createdAt.lte = new Date(dateTo);
+    }
+    if (search) {
+      where.OR = [
+        { invoiceNumber: { contains: search, mode: 'insensitive' } },
+        { user: { email: { contains: search, mode: 'insensitive' } } },
+        { user: { firstName: { contains: search, mode: 'insensitive' } } },
+        { user: { lastName: { contains: search, mode: 'insensitive' } } },
+        { user: { phone: { contains: search } } },
+      ];
     }
 
     const [orders, total] = await Promise.all([

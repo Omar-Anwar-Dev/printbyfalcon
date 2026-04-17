@@ -52,6 +52,11 @@ export class AnalyticsController {
     return this.analyticsService.getTopSearches(limit ? parseInt(limit) : 20);
   }
 
+  @Get('abandoned-cart-rate')
+  getAbandonedCartRate() {
+    return this.analyticsService.getAbandonedCartRate();
+  }
+
   @Get('export')
   @Roles('SUPERADMIN')
   async exportExcel(

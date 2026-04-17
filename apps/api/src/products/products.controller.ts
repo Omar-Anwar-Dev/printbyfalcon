@@ -36,6 +36,14 @@ export class ProductsController {
     return this.productsService.findBySlug(slug);
   }
 
+  @Get('products/:slug/related')
+  getRelated(
+    @Param('slug') slug: string,
+    @Query('limit', new DefaultValuePipe(8), ParseIntPipe) limit: number,
+  ) {
+    return this.productsService.getRelatedBySlug(slug, limit);
+  }
+
   // ── Admin routes ──────────────────────────────────────────
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SUPERADMIN', 'SALES_MANAGER')

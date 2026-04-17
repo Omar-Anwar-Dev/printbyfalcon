@@ -223,6 +223,77 @@ export class ProductsService {
     });
   }
 
+  // ── Compatible products (cartridge ↔ printer) ────────────
+  async getCompatibleProducts(productId: string, limit = 8) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: { compatibility: true, categoryId: true, brandId: true },
+    });
+    if (!product) throw new NotFoundException('Product not found');
+
+    const compat: any = product.compatibility ?? {};
+    const models: string[] = Array.isArray(compat.models) ? compat.models : [];
+
+    // Primary: match by shared printer model tokens in compatibility JSON
+    if (models.length > 0) {
+      const candidates = await this.prisma.product.findMany({
+        where: {
+          id: { not: productId },
+          isActive: true,
+          status: ProductStatus.ACTIVE,
+          compatibility: { not: Prisma.JsonNull },
+        },
+        take: 100,
+        include: {
+          brand: { select: { nameEn: true, nameAr: true } },
+          images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+        },
+      });
+
+      const scored = candidates
+        .map((c) => {
+          const cModels: string[] = ((c.compatibility as any)?.models ?? []) as string[];
+          const overlap = cModels.filter((m) => models.includes(m)).length;
+          return { c, overlap };
+        })
+        .filter((s) => s.overlap > 0)
+        .sort((a, b) => b.overlap - a.overlap)
+        .slice(0, limit)
+        .map((s) => s.c);
+
+      if (scored.length > 0) return scored;
+    }
+
+    // Fallback: same category + brand
+    return this.prisma.product.findMany({
+      where: {
+        id: { not: productId },
+        isActive: true,
+        status: ProductStatus.ACTIVE,
+        OR: [
+          product.brandId ? { brandId: product.brandId } : {},
+          product.categoryId ? { categoryId: product.categoryId } : {},
+        ].filter((o) => Object.keys(o).length > 0),
+      },
+      take: limit,
+      orderBy: { soldCount: 'desc' },
+      include: {
+        brand: { select: { nameEn: true, nameAr: true } },
+        images: { orderBy: { sortOrder: 'asc' }, take: 1 },
+      },
+    });
+  }
+
+  // ── Related products by slug ─────────────────────────────
+  async getRelatedBySlug(slug: string, limit = 8) {
+    const product = await this.prisma.product.findUnique({
+      where: { slug },
+      select: { id: true },
+    });
+    if (!product) throw new NotFoundException('Product not found');
+    return this.getCompatibleProducts(product.id, limit);
+  }
+
   // ── Duplicate product ─────────────────────────────────────
   async duplicate(id: string) {
     const original = await this.findById(id);

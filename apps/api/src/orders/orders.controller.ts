@@ -63,10 +63,12 @@ export class OrdersController {
     @Query('paymentMethod') paymentMethod?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('customerId') customerId?: string,
+    @Query('search') search?: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit?: number,
   ) {
-    return this.ordersService.getAllOrders({ status, paymentMethod, dateFrom, dateTo, page, limit });
+    return this.ordersService.getAllOrders({ status, paymentMethod, dateFrom, dateTo, customerId, search, page, limit });
   }
 
   // PATCH /api/v1/admin/orders/:id/status
