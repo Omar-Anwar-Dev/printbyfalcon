@@ -2,22 +2,27 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  Logger,
   Inject,
   forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CartService } from '../cart/cart.service';
 import { PaymentsService } from '../payments/payments.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CheckoutDto } from './dto/checkout.dto';
 import { PaymentMethod, OrderStatus } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private prisma: PrismaService,
     private cartService: CartService,
     @Inject(forwardRef(() => PaymentsService))
     private paymentsService: PaymentsService,
+    private notifications: NotificationsService,
   ) {}
 
   // ── Generate invoice number ─────────────────────────────
@@ -183,6 +188,15 @@ export class OrdersService {
           note: 'Cash on delivery - order confirmed',
         },
       });
+
+      // Notify customer (fire-and-forget — don't slow down the response)
+      this.prisma.order
+        .findUnique({ where: { id: order.id }, include: { user: true, items: true } })
+        .then((enriched) => {
+          if (enriched) this.notifications.notifyOrderCreated(enriched).catch(() => {});
+        })
+        .catch((e) => this.logger.error('COD notification fetch failed:', e.message));
+
       return {
         success: true,
         orderId: order.id,
@@ -330,6 +344,14 @@ export class OrdersService {
         trackingNumber: trackingNumber || null,
       },
     });
+
+    // Notify customer about status change (fire-and-forget)
+    this.prisma.order
+      .findUnique({ where: { id: orderId }, include: { user: true, items: true } })
+      .then((enriched) => {
+        if (enriched) this.notifications.notifyOrderStatusChanged(enriched, status).catch(() => {});
+      })
+      .catch((e) => this.logger.error('Status notification fetch failed:', e.message));
 
     return { success: true, message: `Order status updated to ${status}` };
   }
